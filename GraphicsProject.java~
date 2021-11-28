@@ -1,0 +1,426 @@
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+import javax.imageio.*;
+import java.io.*;
+import javax.sound.sampled.*;
+import java.awt.Toolkit;
+import java.net.*;   
+import java.lang.Math;
+import javax.sound.sampled.AudioInputStream; 
+import javax.sound.sampled.AudioSystem; 
+import javax.sound.sampled.Clip; 
+import javax.sound.sampled.LineUnavailableException; 
+import javax.sound.sampled.UnsupportedAudioFileException; 
+
+public class GraphicsProject 
+{
+ 
+ 	public static void main(String...args) 
+ 	{ 
+  		JFrame j = new JFrame();  
+  		MyPanel m = new MyPanel();
+  		j.setSize(m.getSize());
+  		j.add(m); 
+  		j.setVisible(true); 
+  		j.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+ 	}
+ 
+}
+
+class MyPanel extends JPanel implements ActionListener, KeyListener, MouseListener 
+{
+	  
+	private Timer time;
+	private Timer time2;
+	private int timer;
+	private int left;
+	private int up;
+	private int down;
+	private int stayLeft;
+	private int stayDown;
+	private int birdsLeft;
+	private int sunDown;
+	private int degrees;
+	static File file; 
+	static AudioInputStream stream; 
+	static Clip music; 
+ 
+	MyPanel()  
+	{
+ 		time = new Timer(15000, this);
+ 		time2 = new Timer(15,this);
+   		timer = 0;
+ 		setSize(2000, 1000);
+ 		setVisible(true); 
+ 		left = 0;
+ 		up = 0;
+ 		birdsLeft = 0;
+ 		degrees = 0;
+ 		setFocusable(true);
+ 		addKeyListener(this);
+		addMouseListener(this);
+	}
+ 
+ 	public void paintComponent(Graphics g)
+	{
+		if(sunDown<1000)
+			drawBackground(g,up);
+		else
+			drawBackground2(g);
+ 		drawClouds(g);
+ 		drawRunway(g,left,up);
+  		drawAirport(g);
+  		drawAirplane(g);
+  		drawBirds(g);
+  		drawSun(g);
+  		drawMoon(g);
+ 	 	if(left==0)
+ 	   		words(g);
+ 	 	if(left >= 10 && up == 0)
+ 	   		words2(g);
+  		if(timer >= 25000 && timer <= 31000)
+  	  		words3(g);
+  		if(timer >= 31000 && up+down <=10)
+  		{
+  	  		music.stop();
+  	  		playMusic2();
+  	  		words4(g);
+  	  		time2.stop();
+ 	   		time.stop();
+ 	 	}
+ 	}
+ 
+	public void actionPerformed(ActionEvent e) //moves the airplane horizontally
+	{
+		time2.start();
+ 		left+=5;
+ 		timer+=15;
+ 		repaint();
+ 		if(birdsLeft >= 2500)
+ 			birdsLeft = 0;
+ 		birdsLeft= birdsLeft + 10;
+ 		sunDown += 2;
+ 		if(sunDown >=1500)
+			sunDown*=-1;
+		if(sunDown <= -1)
+			sunDown*=-1;
+		if(degrees == 90)
+			degrees = 0;
+ 	}
+
+ 	public void keyPressed(KeyEvent e) //user starts animation and goes down by pressing down
+	{
+ 		if(e.getKeyCode()==KeyEvent.VK_A)
+ 	 	{ 
+ 	  		time.start();
+ 	  		playMusic();
+ 	 	}
+ 	 	if(e.getKeyCode() == KeyEvent.VK_DOWN)
+ 	  		down -= 10;
+ 
+ 	 	repaint();
+ 	}
+ 
+ 	public void playMusic() //plays airplane music
+ 	{
+ 		try
+ 	 	{
+  			music();
+  		}
+  		catch(Exception e){}
+ 	}
+ 
+	public void playMusic2() //plays SUCCESS!!! music
+	{
+  		try
+  		{
+  		 	music2();
+  		}
+ 		catch(Exception e){}
+ 	}
+ 
+ 	public void music() throws Exception  
+ 	{
+  		file = new File("airplane2.wav");//File must be .WAV, .AU, or .AIFF
+  		stream = AudioSystem.getAudioInputStream(file);
+  		music = AudioSystem.getClip();
+  		music.open(stream);
+  		music.start(); //Start the music
+  		music.loop(Clip.LOOP_CONTINUOUSLY); //Loop the music
+  		//music.stop(); //Stop the music
+ 		//music.close(); //Unload the clip from memory
+ 	}
+ 
+ 	public void music2() throws Exception  
+	{
+		file = new File("kids-cheering-gaming-sound-effect-hd.wav");//File must be .WAV, .AU, or .AIFF
+		stream = AudioSystem.getAudioInputStream(file);
+		music = AudioSystem.getClip();
+ 		music.open(stream);
+ 		music.start(); //Start the music
+ 	 	//music.loop(Clip.LOOP_CONTINUOUSLY); //Loop the music
+ 	 	//music.stop(); //Stop the music
+ 	 	//music.close(); //Unload the clip from memory
+ 	}
+ 
+ 	public void keyReleased(KeyEvent e){}
+ 
+ 	public void keyTyped(KeyEvent e){}
+ 	public void mousePressed(MouseEvent e) // clicks mouse to move plane up
+ 	{
+ 	 	up=up+10;
+ 	 	repaint();
+ 	}
+ 	public void mouseReleased(MouseEvent e){}
+
+ 	public void mouseClicked(MouseEvent e){}
+
+ 	public void mouseEntered(MouseEvent e){}
+	public void mouseExited(MouseEvent e){}
+ 
+ 	public void drawBackground(Graphics g,int up) //draws the background
+    {
+    	Color blue = new Color(31,190,214);
+     	g.setColor(blue);
+     	g.fillRect(0,0,2000,1500);
+     	g.setColor(Color.GREEN);
+     	g.fillRect(0,850+up + down,2000,1000);
+    }  
+    
+    public void drawBackground2(Graphics g)
+    {
+    	g.setColor(Color.BLUE);
+    	g.fillRect(0,0,2000,1500);
+    	g.setColor(Color.GREEN);
+    	g.fillRect(0,850+up+down,2000,1000);
+    }
+    public void words(Graphics g) //what user presses to start the animation
+    {
+     	g.setColor(Color.RED);
+     	g.setFont(new Font("TimesRoman", Font.PLAIN, 100)); 
+     	g.drawString("Press A",600,400);
+    }
+    
+    public void words2(Graphics g) // when user needs to take off
+    {
+      	g.setColor(Color.RED);
+      	g.setFont(new Font("TimesRoman", Font.PLAIN, 100)); 
+      	g.drawString("Click the mouse",600,400);
+    }
+    
+    public void words3(Graphics g) //when user is about to land
+    {
+      	g.setColor(Color.RED);
+      	g.setFont(new Font("TimesRoman", Font.PLAIN, 100)); 
+      	g.drawString("Press down",600,400);
+    }
+    
+    public void words4(Graphics g) //when user successfully lands
+    {
+     	 g.setColor(Color.RED);
+     	 g.setFont(new Font("TimesRoman", Font.PLAIN, 100)); 
+     	 g.drawString("SUCCESS!!!!!",600,400);
+    }
+    
+    public void drawClouds(Graphics g)
+    {
+     	g.setColor(Color.WHITE);
+     
+     	g.fillOval(30,20,40,40);
+    	g.fillOval(55,20,40,40);
+    	g.fillOval(80,20,40,40);
+    	g.fillOval(30,45,40,40);
+    	g.fillOval(55,45,40,40);
+    	g.fillOval(80,45,40,40);
+    	g.fillOval(90,32,40,40);
+    	g.fillOval(20,32,40,40);
+      
+     	g.fillOval(30+100,20+320,40,40);
+     	g.fillOval(55+100,20+320,40,40);
+    	g.fillOval(80+100,20+320,40,40);
+    	g.fillOval(30+100,45+320,40,40);
+    	g.fillOval(55+100,45+320,40,40);
+    	g.fillOval(80+100,45+320,40,40);
+    	g.fillOval(90+100,32+320,40,40);
+     	g.fillOval(20+100,32+320,40,40);
+      
+     	g.fillOval(30+350,20+250,40,40);
+     	g.fillOval(55+350,20+250,40,40);
+     	g.fillOval(80+350,20+250,40,40);
+     	g.fillOval(30+350,45+250,40,40);
+     	g.fillOval(55+350,45+250,40,40);
+     	g.fillOval(80+350,45+250,40,40);
+     	g.fillOval(90+350,32+250,40,40);
+     	g.fillOval(20+350,32+250,40,40);
+      
+      
+     	g.fillOval(30+700,20+200,40,40);
+     	g.fillOval(55+700,20+200,40,40);
+     	g.fillOval(80+700,20+200,40,40);
+     	g.fillOval(30+700,45+200,40,40);
+     	g.fillOval(55+700,45+200,40,40);
+     	g.fillOval(80+700,45+200,40,40);
+     	g.fillOval(90+700,32+200,40,40);
+    	g.fillOval(20+700,32+200,40,40);
+      
+     	g.fillOval(30+1000,20+400,40,40);
+     	g.fillOval(55+1000,20+400,40,40);
+     	g.fillOval(80+1000,20+400,40,40);
+     	g.fillOval(30+1000,45+400,40,40);
+     	g.fillOval(55+1000,45+400,40,40);
+     	g.fillOval(80+1000,45+400,40,40);
+     	g.fillOval(90+1000,32+400,40,40);
+     	g.fillOval(20+1000,32+400,40,40);
+      
+     	g.fillOval(30+1500,20+240,40,40);
+     	g.fillOval(55+1500,20+240,40,40);
+     	g.fillOval(80+1500,20+240,40,40);
+     	g.fillOval(30+1500,45+240,40,40);
+     	g.fillOval(55+1500,45+240,40,40);
+     	g.fillOval(80+1500,45+240,40,40);
+     	g.fillOval(90+1500,32+240,40,40);
+     	g.fillOval(20+1500,32+240,40,40);
+      
+     	g.fillOval(30+2000,20+350,40,40);
+     	g.fillOval(55+2000,20+350,40,40);
+     	g.fillOval(80+2000,20+350,40,40);
+     	g.fillOval(30+2000,45+350,40,40);
+     	g.fillOval(55+2000,45+350,40,40);
+     	g.fillOval(80+2000,45+350,40,40);
+     	g.fillOval(90+2000,32+350,40,40);
+     	g.fillOval(20+2000,32+350,40,40);
+    }
+    
+    public void drawRunway(Graphics g,int left,int up)
+    {
+     	//road1 
+     	g.setColor(Color.GRAY);
+     	g.fillRect(300-left,900+up+down,2000,1000);
+     	//lines1
+     	g.setColor(Color.YELLOW);
+     	for(int x = 0; x < 16; x++) 
+      		g.fillRect(350 + x*120 -left,950+up+down,100,50);
+     	//road2
+     	g.setColor(Color.GRAY);
+     	g.fillRect(10000-left,900+up+down,2000,1000);
+     	//lines2
+     	g.setColor(Color.YELLOW);
+     	for(int x = 0; x < 16; x++) 
+      		g.fillRect(10100 + x*120 -left,950+up+down,100,50);
+    }
+    
+    public void drawAirport(Graphics g)
+    {
+     	//roof 
+     	g.setColor(Color.BLACK);
+     	g.fillRect(0-left,550+up+down,200,75);
+     	g.fillArc(20-left,575+up+down,300,100,0,90);
+     	//windows
+     	g.setColor(new Color(135,206,235));
+     	g.fillRect(0-left,625+up+down,320,100);
+     	//base
+     	g.setColor(Color.GRAY);
+     	g.fillRect(0-left,725+up+down,320,150);
+     	//window lines
+     	g.setColor(Color.BLACK);
+     	g.drawLine(40-left,625+up+down,40-left,725+up+down);
+     	g.drawLine(80-left,625+up+down,80-left,725+up+down);
+     	g.drawLine(120-left,625+up+down,120-left,725+up+down);
+     	g.drawLine(160-left,625+up+down,160-left,725+up+down);
+     	g.drawLine(200-left,625+up+down,200-left,725+up+down);
+     	g.drawLine(240-left,625+up+down,240-left,725+up+down);
+     	g.drawLine(280-left,625+up+down,280-left,725+up+down);
+     	g.drawLine(320-left,625+up+down,320-left,725+up+down);
+    } 
+     
+    public void drawAirplane(Graphics g)
+    {
+     	if(left < 500)
+       		stayLeft = left;
+     	if(up < 400)
+       		stayDown = up;
+     	//body
+     	g.setColor(Color.WHITE);
+     	g.fillRect(350+stayLeft,850-stayDown-down,450,90);
+     	//top head
+     	Polygon c = new Polygon();
+     	c.addPoint(800+stayLeft,850-stayDown-down);
+     	c.addPoint(850+stayLeft,875-stayDown-down);
+     	c.addPoint(800+stayLeft,875-stayDown-down);
+     	g.fillPolygon(c);  
+     	//bottom head                                                                                                                                                                                                
+     	g.fillArc(725+stayLeft,810-stayDown-down,120,130,270,90);
+     	//bottom tail
+     	g.fillArc(270+stayLeft,760-stayDown-down,200,180,180,90);
+     	//top tail
+     	Polygon p = new Polygon();
+     	p.addPoint(350+stayLeft,850-stayDown-down);
+     	p.addPoint(300+stayLeft,800-stayDown-down);
+     	p.addPoint(280+stayLeft,700-stayDown-down);
+     	p.addPoint(260+stayLeft,700-stayDown-down);
+     	p.addPoint(270+stayLeft,850-stayDown-down);
+     	g.fillPolygon(p);
+     	//wing
+     	Polygon a = new Polygon();
+     	a.addPoint(700+stayLeft,880-stayDown-down);
+     	a.addPoint(700+stayLeft,900-stayDown-down);
+     	a.addPoint(650+stayLeft,920-stayDown-down);
+     	a.addPoint(400+stayLeft,890-stayDown-down);
+     	a.addPoint(400+stayLeft,880-stayDown-down);
+     	g.setColor(Color.BLACK);
+     	g.drawPolygon(a);
+     	//wheels
+     	g.fillOval(500+stayLeft,950-stayDown-down,30,30);
+     	g.fillOval(750+stayLeft,950-stayDown-down,30,30);
+     	g.fillRect(513+stayLeft,940-stayDown-down,5,15);
+     	g.fillRect(763+stayLeft,940-stayDown-down,5,15);
+     	//engine
+     	Color y = new Color(200,200,200);
+     	g.setColor(y);
+     	g.fillRect(700+stayLeft,900-stayDown-down,75,50);
+     	Color z = new Color(180,180,180);
+     	g.setColor(z);
+     	Polygon b = new Polygon();
+     	b.addPoint(700+stayLeft,900-stayDown-down);
+     	b.addPoint(650+stayLeft,920-stayDown-down);
+     	b.addPoint(650+stayLeft,930-stayDown-down);
+     	b.addPoint(700+stayLeft,950-stayDown-down);
+     	g.fillPolygon(b);
+     	//captain window
+     	g.setColor(Color.BLACK);
+     	Polygon d = new Polygon();
+     	d.addPoint(820+stayLeft,860-stayDown-down);
+     	d.addPoint(795+stayLeft,860-stayDown-down);
+     	d.addPoint(793+stayLeft,865-stayDown-down);
+     	d.addPoint(793+stayLeft,870-stayDown-down);
+     	d.addPoint(840+stayLeft,870-stayDown-down);
+     	g.fillPolygon(d);
+     	//windows
+     	for(int x = 0; x < 20; x++)
+      		g.fillRect(350+x*20+stayLeft,865-stayDown-down,10,10);
+     	//door
+     	g.drawRect(755+stayLeft,855-stayDown-down,20,40);
+    }
+    
+    public void drawBirds(Graphics g)
+    {
+     	g.setColor(Color.BLACK);
+     	g.fillRect(2400-birdsLeft,200,20,20);
+     	g.fillRect(2450-birdsLeft,250,20,20);
+     	g.fillRect(2530-birdsLeft,180,20,20);
+    }
+    
+    public void drawSun(Graphics g)
+    {
+    	g.setColor(Color.YELLOW);
+    	g.fillOval(10+sunDown,10+sunDown*((int)Math.sin(degrees)),100,100);
+    }
+    
+    public void drawMoon(Graphics g)
+    {
+    	g.setColor(Color.GRAY);
+    	g.fillOval(1700,2000-sunDown,100,100);
+    }
+    
+}
